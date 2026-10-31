@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مسابقة قارئة بوعي</title>
+<style>
+:root{--ink:#24443d;--green:#2f7664;--mint:#e9f5ef;--gold:#e6b85c;--pink:#f7e8ec}
+*{box-sizing:border-box}
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:linear-gradient(135deg,#f8f4e9,#e7f3ed);color:var(--ink);min-height:100vh;display:grid;place-items:center;padding:18px}
+.app{width:min(780px,100%);background:#fffdf8;border:3px solid #d9e9df;border-radius:28px;box-shadow:0 16px 45px #24443d1c;overflow:hidden}
+header{padding:28px 22px 22px;text-align:center;background:linear-gradient(120deg,#dff0e7,#fff2d8);position:relative}
+.book{font-size:48px}
+h1{margin:8px 0;color:#286454;font-size:clamp(27px,5vw,40px)}
+.subtitle{font-size:17px;color:#58766d}
+.school{font-size:13px;line-height:1.9;margin-top:15px;color:#526b62}
+main{padding:24px}
+.topline{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;font-weight:bold}
+.pill{background:var(--mint);padding:9px 14px;border-radius:30px}
+.progress{height:10px;background:#e9eee9;border-radius:20px;overflow:hidden;margin-bottom:22px}
+.bar{height:100%;width:0;background:linear-gradient(90deg,#62a78d,#e5b85d);transition:width .3s}
+.question{font-size:clamp(19px,3vw,25px);line-height:1.7;margin:12px 0 20px}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.option{border:2px solid #dce9e1;background:#fbfdfb;border-radius:16px;padding:15px;text-align:right;font:inherit;font-size:17px;color:var(--ink);cursor:pointer;transition:.18s;min-height:62px}
+.option:hover:not(:disabled){border-color:#68a58e;background:#eff8f2;transform:translateY(-2px)}
+.option:disabled{cursor:default;opacity:1}
+.option.correct{background:#e2f4e8;border-color:#55a276}
+.option.wrong{background:#fae8e8;border-color:#d77d7d}
+.feedback{display:none;margin-top:17px;padding:14px 16px;border-radius:14px;line-height:1.7;background:#f4f1e7}
+.feedback.show{display:block}
+.actions{display:flex;justify-content:center;margin-top:20px}
+.primary{border:0;border-radius:30px;padding:13px 30px;background:#2f7664;color:white;font:inherit;font-size:17px;cursor:pointer}
+.primary:hover{background:#245d50}
+.primary:disabled{opacity:.45;cursor:not-allowed}
+.intro,.result{text-align:center;line-height:1.9}
+.intro p{font-size:17px}
+.result .score{font-size:46px;font-weight:bold;color:#2f7664;margin:10px}
+footer{text-align:center;padding:15px;background:#f5f8f3;color:#6b8178;font-size:12px;line-height:1.9}
+@media(max-width:560px){.options{grid-template-columns:1fr}main{padding:18px}.option{min-height:54px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="book">📚🌷</div>
+  <h1>مسابقة قارئة بوعي</h1>
+  <div class="subtitle">أقرأ لأفهم • أفهم لأبدع • أبدع لأنطلق</div>
+  <div class="school">الابتدائية الثالثة والعشرون بالمبرز<br>إعداد المعلمة: عواطف الخلف | مديرة المدرسة: مها السبيعي</div>
+</header>
+<main id="content">
+  <section class="intro">
+    <h2>مرحبًا بكِ أيتها القارئة المبدعة! ✨</h2>
+    <p>اختبري فهمكِ ومهاراتكِ القرائية في 10 أسئلة ممتعة. اختاري الإجابة الصحيحة، واجمعي أكبر عدد من النقاط.</p>
+    <label for="studentName" style="display:block;font-weight:bold;margin:18px 0 8px">اسم الطالبة</label>
+    <input id="studentName" type="text" maxlength="40" placeholder="اكتبي اسمكِ هنا"
+      style="width:min(420px,100%);padding:13px 15px;border:2px solid #dce9e1;border-radius:14px;font:inherit;text-align:center;font-size:17px">
+    <p>🌟 كل إجابة صحيحة = 10 نقاط</p>
+    <button class="primary" id="start">ابدئي المسابقة</button>
+    <p id="nameError" style="color:#b84b4b;display:none">يرجى كتابة اسم الطالبة أولًا.</p>
+  </section>
+</main>
+<footer>مبادرة قارئة بوعي · بالقراءة نكتشف ونتعلم ونبدع</footer>
+</div>
+<script>
+const questions = [
+ {q:"ما الفكرة الرئيسة من قراءة قصة قصيرة؟",a:["معرفة أحداثها وفهم معناها","عدّ صفحات الكتاب فقط","النظر إلى لون الغلاف","حفظ عنوان القصة دون قراءتها"],c:0,why:"الفكرة من القراءة هي فهم الأحداث والمعاني واستخلاص ما نتعلمه."},
+ {q:"إذا واجهتِ كلمة لا تعرفين معناها، ماذا تفعلين؟",a:["أتجاوز النص كله","أحاول فهمها من سياق الجملة أو أبحث عنها","أختار معنى عشوائيًا","أتوقف عن القراءة دائمًا"],c:1,why:"يساعد سياق الجملة أو المعجم على معرفة معنى الكلمة."},
+ {q:"أيّ مما يأتي يدل على قارئة واعية؟",a:["تقرأ دون انتباه","تكتفي بسرعة القراءة","تفكر وتسأل وتعبّر عن رأيها","لا تهتم بمعاني النص"],c:2,why:"القارئة الواعية تفهم وتفكر وتسأل وتناقش ما تقرؤه."},
+ {q:"ماذا نسمي الشخص الذي يكتب القصة؟",a:["القارئ","الكاتب","الرسام","الناشر"],c:1,why:"الكاتب هو من يؤلف النص أو القصة."},
+ {q:"بعد الانتهاء من قراءة نص، ما التصرف الأفضل؟",a:["أنسى ما قرأت فورًا","أغلق الكتاب دون تفكير","أناقش ما فهمته وما تعلمته","أحكم على النص من غلافه"],c:2,why:"مناقشة النص تساعد على تثبيت الفهم واستخلاص الفائدة."},
+ {q:"أيّ سؤال يساعدكِ على إبداء الرأي في قصة؟",a:["ما رأيكِ في تصرف الشخصية؟","كم حرفًا في الغلاف؟","ما لون الطاولة؟","هل الكتاب ثقيل؟"],c:0,why:"السؤال عن التصرفات يتيح لكِ التفكير وإبداء رأيكِ مع ذكر السبب."},
+ {q:"ما المكان الأنسب للمحافظة على هدوء القراءة؟",a:["مكان كثير الضوضاء","مكان هادئ ومريح","وسط اللعب والصخب","بجانب صوت مرتفع"],c:1,why:"المكان الهادئ يساعد على التركيز وفهم المقروء."},
+ {q:"ماذا نستفيد من عنوان النص قبل قراءته؟",a:["نتوقع موضوع النص","نعرف النهاية بالتأكيد","نستغني عن قراءة النص","نعرف عدد شخصياته دائمًا"],c:0,why:"العنوان يقدم فكرة أولية ويساعدنا على توقع موضوع النص."},
+ {q:"إذا اختلفتِ مع رأي ورد في النص، ماذا تفعلين؟",a:["أرفض القراءة","أوضح رأيي بأدب وأذكر السبب","أسخر من الرأي","أتجاهل كل الأفكار"],c:1,why:"القارئة الواعية تحترم الآراء وتوضح وجهة نظرها بأدب."},
+ {q:"أيّ عبارة تعبّر عن مبادرة قارئة بوعي؟",a:["أقرأ الكلمات دون فهم","أقرأ لأفهم وأفكر وأبدع","لا أحتاج إلى القراءة","القراءة للامتحان فقط"],c:1,why:"القراءة الواعية تقود إلى الفهم والتفكير والإبداع والتقدم."}
+];
+let index=0,score=0,locked=false,studentName="";
+const content=document.getElementById('content');
+document.getElementById('start').addEventListener('click',()=>{
+ const field=document.getElementById('studentName');
+ studentName=field.value.trim();
+ if(!studentName){document.getElementById('nameError').style.display='block';field.focus();return;}
+ index=0;score=0;render();
+});
+function start(){index=0;score=0;render()}
+function render(){
+ locked=false;
+ const q=questions[index];
+ content.innerHTML=`<div class="topline"><span class="pill">الطالبة: ${escapeHtml(studentName)}</span><span class="pill">السؤال ${index+1} من ${questions.length}</span><span class="pill">⭐ النقاط: ${score}</span></div>
+ <div class="progress"><div class="bar" style="width:${index/questions.length*100}%"></div></div>
+ <div class="question">${q.q}</div>
+ <div class="options">${q.a.map((x,i)=>`<button class="option" data-i="${i}">${["أ","ب","ج","د"][i]}. ${x}</button>`).join("")}</div>
+ <div class="feedback" id="feedback" aria-live="polite"></div>
+ <div class="actions"><button class="primary" id="next" disabled>${index===questions.length-1?"عرض النتيجة":"السؤال التالي"}</button></div>`;
+ document.querySelectorAll('.option').forEach(b=>b.addEventListener('click',()=>choose(Number(b.dataset.i))));
+ document.getElementById('next').addEventListener('click',()=>{index++;if(index<questions.length)render();else result()});
+}
+function choose(choice){
+ if(locked)return;locked=true;
+ const q=questions[index],buttons=[...document.querySelectorAll('.option')];
+ buttons.forEach((b,i)=>{b.disabled=true;if(i===q.c)b.classList.add('correct');else if(i===choice)b.classList.add('wrong')});
+ const good=choice===q.c;if(good)score+=10;
+ const fb=document.getElementById('feedback');fb.classList.add('show');
+ fb.innerHTML=(good?"🌟 أحسنتِ! إجابة صحيحة. ":"💡 محاولة جميلة! الإجابة الصحيحة مميزة باللون الأخضر. ")+q.why;
+ document.querySelector('.topline').lastElementChild.textContent="⭐ النقاط: "+score;
+ document.getElementById('next').disabled=false;
+}
+function escapeHtml(value){return value.replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));}
+function result(){
+ const msg=score===100?"قارئة متميزة! أبدعتِ في جميع الأسئلة 🏆":score>=70?"قارئة رائعة! واصلي القراءة والتألق 🌷":"بداية جميلة! أعيدي المحاولة لتزدادي معرفة ✨";
+ content.innerHTML=`<section class="result"><div style="font-size:48px">🏆📖</div><h2>انتهت المسابقة!</h2><p>أحسنتِ يا ${escapeHtml(studentName)} 🌷</p><div class="score">${score} / 100</div><h3>${msg}</h3><p>شكرًا لمشاركتكِ في مسابقة قارئة بوعي.</p><button class="primary" id="again">إعادة المسابقة</button></section>`;
+ document.getElementById('again').addEventListener('click',start);
+}
+</script>
+</body>
+</html>
